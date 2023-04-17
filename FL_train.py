@@ -7,7 +7,7 @@ from transformers import AutoTokenizer, AutoModel, AdamW, AutoModelForSequenceCl
 from transformers import Trainer, TrainingArguments
 
 
-def init_trainer(model_name, train_data, val_data)
+def init_trainer(model_name, train_data, val_data):
 
     training_args = TrainingArguments(output_dir="checkpoints",
                                       evaluation_strategy="epoch",
