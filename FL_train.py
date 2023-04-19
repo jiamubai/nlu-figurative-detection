@@ -83,7 +83,7 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
         print("Validation loss: {:.3f}, r2 score: {}".format(val_loss, r2))
         r_scores.append(r_scores)
         torch.save(BertweetRegressor.state_dict(), "{}/epoch{}.pt".format(file_path, epoch))
-    r_scores = torch.cat(tuple(r_scores))
+    r_scores = torch.stack(r_scores)
     print("Best val achieved at epoch {}, with r2 score{}".format(torch.argmax(r_scores), troch.max(r_scores)))
 
 
