@@ -54,6 +54,8 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
         for i in tqdm(range(0, len(train_data), batch_size)):
             batch = train_data[i:i + batch_size]
             # calculate loss and do SGD
+            assert len(batch["input_ids"]) == len(batch["attention_mask"])
+            print(batch["input_ids"])
             print(torch.tensor(batch["input_ids"]))
             logits = BertweetRegressor(torch.tensor(batch["input_ids"]), torch.tensor(batch["attention_mask"]))
             batch_labels = torch.cat((batch["V"], batch["A"], batch["D"]), 1)
@@ -112,7 +114,7 @@ if __name__ == '__main__':
     # main training script:
     model_name = "vinai/bertweet-base"
     # load and preprocess dataset
-    reg_dataset = load_dataset("csv", download_mode='force_redownload', data_files={"train": "norm_emobank_train.csv", "test": "norm_emobank_test.csv"})
+    reg_dataset = load_dataset("csv", data_files={"train": "norm_emobank_train.csv", "test": "norm_emobank_test.csv"})
     clf_dataset = load_dataset("csv", data_files={"train": "sar_and_meta_train.csv", "test": "sar_and_meta_test.csv"})
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
     reg_dataset["train"] = preprocess_data(reg_dataset["train"], tokenizer)
