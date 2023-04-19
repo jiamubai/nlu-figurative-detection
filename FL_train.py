@@ -18,7 +18,7 @@ class BertweetRegressor(nn.Module):
         self.regressor = nn.Sequential(
             nn.Dropout(drop_rate),
             nn.Linear(D_in, D_out))
-        # self.double()
+        self.double()
 
     def forward(self, input_ids, attention_masks):
         outputs = self.bertweet(input_ids, attention_masks)
