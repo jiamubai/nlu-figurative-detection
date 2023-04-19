@@ -73,8 +73,8 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
         print("Validation loss: {:.3f}".format(val_loss))
         val_losses.append(val_loss)
         torch.save(BertweetRegressor.state_dict(), "{}/epoch{}.pt".format(file_path, epoch))
-
-    print("Best val achieved at epoch {}, with agg.loss score{}".format(np.argmin(np.array(val_losses)), np.min(val_losses)))
+    val_losses = torch.cat(tuple(val_losses))
+    print("Best val achieved at epoch {}, with agg.loss score{}".format(torch.argmin(val_losses), troch.min(val_losses)))
 
 
 # def init_trainer(model_name, train_data, val_data):
