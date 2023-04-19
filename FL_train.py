@@ -29,6 +29,7 @@ class BertweetRegressor(nn.Module):
 # evaluate model performace (R2 score)
 def evaluate(model, test_data: Dataset, batch_size: int = 32):
     model.eval()
+    losses = []
     with torch.no_grad():
         for i in tqdm(range(0, len(test_data), batch_size)):
             batch = test_data[i:i + batch_size]
@@ -37,8 +38,9 @@ def evaluate(model, test_data: Dataset, batch_size: int = 32):
             batch_labels = torch.tensor(np.array([batch["V"], batch["A"], batch["D"]]).T).float().to(device)
             loss_function = nn.MSELoss(reduction="sum")
             loss = loss_function(outputs, batch_labels)
+            losses.append(loss)
 #             r2 = r2_score(outputs, batch_labels)
-        return loss
+        return sum(losses)
 
 # trainer
 def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
@@ -68,8 +70,8 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
         # Test on validation data
         print("Evaluating on validation data...")
         val_loss = evaluate(BertweetRegressor, val_data, batch_size=batch_size)
-        print("Validation loss: {:.3f}".format(val_loss.to_numpy()))
-        val_losses.append(val_loss.to_numpy())
+        print("Validation loss: {:.3f}".format(val_loss))
+        val_losses.append(val_loss)
         torch.save(BertweetRegressor.state_dict(), "{}/epoch{}.pt".format(file_path, epoch))
 
     print("Best val achieved at epoch {}, with agg.loss score{}".format(np.argmin(np.array(val_losses)), np.min(val_losses)))
