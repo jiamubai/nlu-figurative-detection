@@ -32,8 +32,10 @@ def evaluate(model, test_data: Dataset, batch_size: int = 32):
     with torch.no_grad():
         for i in tqdm(range(0, len(test_data), batch_size)):
             batch = test_data[i:i + batch_size]
-            batch_labels = torch.cat((batch["V"], batch["A"], batch["D"]), 1)
-            outputs = model(batch["input_ids"], batch["attention_mask"])
+            input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(batch["attention_mask"]).to(device)
+            outputs = model(input_ids, attention_mask)
+            batch_v, batch_a, batch_d = torch.tensor(batch["V"]).to(device), torch.tensor(batch["A"]).to(device), torch.tensor(batch["D"]).to(device)
+            batch_labels = torch.cat((batch_v, batch_a, batch_d), 1)
             r2 = r2_score(outputs, batch_labels)
         return r2
 
@@ -56,7 +58,8 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
             # calculate loss and do SGD
             input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(batch["attention_mask"]).to(device)
             logits = BertweetRegressor(input_ids, attention_mask)
-            batch_labels = torch.cat((batch["V"], batch["A"], batch["D"]), 1)
+            batch_v, batch_a, batch_d = torch.tensor(batch["V"]).to(device), torch.tensor(batch["A"]).to(device), torch.tensor(batch["D"]).to(device)
+            batch_labels = torch.cat((batch_v, batch_a, batch_d), 1)
             loss = loss_function(logits, batch_labels)
             adam.zero_grad()
             loss.backward()
