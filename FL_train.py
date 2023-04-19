@@ -96,11 +96,12 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
 #     )
 
 def preprocess_data(dataset, tokenizer):
-    dataset.map(lambda x: tokenizer(x['text'],
+    dataset = dataset.map(lambda x: tokenizer(x['text'],
                                     add_special_tokens=True,
                                     padding="max_length",
                                     max_length=128,
                                     truncation="longest_first",
+                                    return_tensors="pt",
                                     # return_attentiton_mask=True,
                                     ))
     return dataset
@@ -110,11 +111,13 @@ if __name__ == '__main__':
     # main training script:
     model_name = "vinai/bertweet-base"
     # load and preprocess dataset
-    reg_dataset = load_dataset("csv", data_files={"train": "norm_emobank_train.csv", "test": "norm_emobank_test.csv"})
+    reg_dataset = load_dataset("csv", download_mode='force_redownload', data_files={"train": "norm_emobank_train.csv", "test": "norm_emobank_test.csv"})
     clf_dataset = load_dataset("csv", data_files={"train": "sar_and_meta_train.csv", "test": "sar_and_meta_test.csv"})
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
     reg_dataset["train"] = preprocess_data(reg_dataset["train"], tokenizer)
+    reg_dataset["train"]["input_ids"] = torch.tensor(reg_dataset["train"]["input_ids"])
     clf_dataset["train"] = preprocess_data(clf_dataset["train"], tokenizer)
+    clf_dataset["train"]["input_ids"] = torch.tensor(clf_dataset["train"]["input_ids"])
     # split training set into traindev
     val_size = 0.1
     seed = 42
@@ -126,7 +129,8 @@ if __name__ == '__main__':
     clf_split = clf_dataset["train"].train_test_split(val_size, seed=seed)
     clf_dataset["train"] = clf_split["train"]
     clf_dataset["val"] = clf_split["test"]
-
+    
+    print(reg_dataset["train"][:2])
     # initialize regressor model
     reg = BertweetRegressor()
     if torch.cuda.is_available():
