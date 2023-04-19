@@ -35,8 +35,10 @@ def evaluate(model, test_data: Dataset, batch_size: int = 32):
             input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(batch["attention_mask"]).to(device)
             outputs = model(input_ids, attention_mask)
             batch_labels = torch.tensor(np.array([batch["V"], batch["A"], batch["D"]]).T).float().to(device)
-            r2 = r2_score(outputs, batch_labels)
-        return r2
+            loss_function = nn.MSELoss()
+            loss = loss_function(outputs, batch_labels)
+#             r2 = r2_score(outputs, batch_labels)
+        return torch.sum(loss)
 
 # trainer
 def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
@@ -45,7 +47,7 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
     adam = AdamW(BertweetRegressor.parameters(), lr=5e-5, eps=1e-8)
     loss_function = nn.MSELoss()
     # store historical residuals
-    val_r2 = []
+    val_losses = []
     for epoch in range(max_epochs):
         print("Epoch {} of {}".format(epoch + 1, max_epochs))
 
@@ -65,12 +67,12 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
             adam.step()
         # Test on validation data
         print("Evaluating on validation data...")
-        r2 = evaluate(BertweetRegressor, val_data, batch_size=batch_size)
-        print("Validation loss: {:.3f}".format(r2))
-        val_r2.append(r2)
+        val_loss = evaluate(BertweetRegressor, val_data, batch_size=batch_size)
+        print("Validation loss: {:.3f}".format(val_loss.to_numpy()))
+        val_losses.append(val_loss.to_numpy())
         torch.save(BertweetRegressor.state_dict(), "{}/epoch{}.pt".format(file_path, epoch))
 
-    print("Best val achieved at epoch {}, with r2 score{}".format(np.argmax(np.array(val_r2)), np.max(val_r2)))
+    print("Best val achieved at epoch {}, with agg.loss score{}".format(np.argmin(np.array(val_losses)), np.min(val_losses)))
 
 
 # def init_trainer(model_name, train_data, val_data):
