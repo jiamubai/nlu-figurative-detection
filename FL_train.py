@@ -104,7 +104,7 @@ def preprocess_data(dataset, tokenizer):
                                     padding="max_length",
                                     max_length=128,
                                     truncation="longest_first",
-                                    return_tensors="pt",
+                                    # return_tensors="pt",
                                     # return_attentiton_mask=True,
                                     ))
     return dataset
