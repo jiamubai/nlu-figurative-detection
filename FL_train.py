@@ -34,8 +34,7 @@ def evaluate(model, test_data: Dataset, batch_size: int = 32):
             batch = test_data[i:i + batch_size]
             input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(batch["attention_mask"]).to(device)
             outputs = model(input_ids, attention_mask)
-            batch_v, batch_a, batch_d = torch.tensor(batch["V"]).to(device), torch.tensor(batch["A"]).to(device), torch.tensor(batch["D"]).to(device)
-            batch_labels = torch.cat((batch_v, batch_a, batch_d), 1)
+            batch_labels = torch.tensor(np.array([batch["V"], batch["A"], batch["D"]]).T).to(device)
             r2 = r2_score(outputs, batch_labels)
         return r2
 
