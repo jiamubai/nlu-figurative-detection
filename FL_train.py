@@ -54,7 +54,7 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
         for i in tqdm(range(0, len(train_data), batch_size)):
             batch = train_data[i:i + batch_size]
             # calculate loss and do SGD
-            logits = BertweetRegressor(batch["input_ids"], batch["attention_mask"])
+            logits = BertweetRegressor(torch.tensor(batch["input_ids"]), torch.tensor(batch["attention_mask"]))
             batch_labels = torch.cat((batch["V"], batch["A"], batch["D"]), 1)
             loss = loss_function(logits, batch_labels)
             adam.zero_grad()
@@ -115,9 +115,9 @@ if __name__ == '__main__':
     clf_dataset = load_dataset("csv", data_files={"train": "sar_and_meta_train.csv", "test": "sar_and_meta_test.csv"})
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
     reg_dataset["train"] = preprocess_data(reg_dataset["train"], tokenizer)
-    reg_dataset["train"]["input_ids"] = torch.tensor(reg_dataset["train"]["input_ids"])
+#     reg_dataset["train"]["input_ids"] = torch.tensor(reg_dataset["train"]["input_ids"])
     clf_dataset["train"] = preprocess_data(clf_dataset["train"], tokenizer)
-    clf_dataset["train"]["input_ids"] = torch.tensor(clf_dataset["train"]["input_ids"])
+#     clf_dataset["train"]["input_ids"] = torch.tensor(clf_dataset["train"]["input_ids"])
     # split training set into traindev
     val_size = 0.1
     seed = 42
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     clf_dataset["train"] = clf_split["train"]
     clf_dataset["val"] = clf_split["test"]
     
-    print(reg_dataset["train"][:2])
+#     print(reg_dataset["train"][:2])
     # initialize regressor model
     reg = BertweetRegressor()
     if torch.cuda.is_available():
