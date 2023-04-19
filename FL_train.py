@@ -18,7 +18,7 @@ class BertweetRegressor(nn.Module):
         self.regressor = nn.Sequential(
             nn.Dropout(drop_rate),
             nn.Linear(D_in, D_out))
-        self.double()
+#         self.double()
 
     def forward(self, input_ids, attention_masks):
         outputs = self.bertweet(input_ids, attention_masks)
@@ -34,7 +34,7 @@ def evaluate(model, test_data: Dataset, batch_size: int = 32):
             batch = test_data[i:i + batch_size]
             input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(batch["attention_mask"]).to(device)
             outputs = model(input_ids, attention_mask)
-            batch_labels = torch.tensor(np.array([batch["V"], batch["A"], batch["D"]]).T).to(device)
+            batch_labels = torch.tensor(np.array([batch["V"], batch["A"], batch["D"]]).T).float().to(device)
             r2 = r2_score(outputs, batch_labels)
         return r2
 
@@ -57,7 +57,7 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
             # calculate loss and do SGD
             input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(batch["attention_mask"]).to(device)
             logits = BertweetRegressor(input_ids, attention_mask)
-            batch_labels = torch.tensor(np.array([batch["V"], batch["A"], batch["D"]]).T).to(device)
+            batch_labels = torch.tensor(np.array([batch["V"], batch["A"], batch["D"]]).T).float().to(device)
             loss = loss_function(logits, batch_labels)
             adam.zero_grad()
             loss.backward()
