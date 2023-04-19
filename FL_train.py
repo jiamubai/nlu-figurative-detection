@@ -54,9 +54,8 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
         for i in tqdm(range(0, len(train_data), batch_size)):
             batch = train_data[i:i + batch_size]
             # calculate loss and do SGD
-            assert len(batch["input_ids"]) == len(batch["attention_mask"])
-            print(torch.tensor(batch["input_ids"][:2]))
-            logits = BertweetRegressor(torch.tensor(batch["input_ids"]), torch.tensor(batch["attention_mask"]))
+            input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(batch["attention_mask"]).to(device)
+            logits = BertweetRegressor(input_ids, attention_mask)
             batch_labels = torch.cat((batch["V"], batch["A"], batch["D"]), 1)
             loss = loss_function(logits, batch_labels)
             adam.zero_grad()
