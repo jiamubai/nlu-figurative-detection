@@ -29,13 +29,14 @@ class BertweetRegressor(nn.Module):
     
 # calculate residual
 def cal_r2_score(outputs, labels):
-    outputs = torch.sum(outputs, dim=1)
-    labels = torch.sum(labels, dim=1)
-    labels_mean = torch.mean(labels)
-    ss_tot = torch.sum((labels - labels_mean) ** 2)
-    ss_res = torch.sum((labels - outputs) ** 2)
+    labels_mean = torch.mean(labels, dim=0)
+#     outputs = torch.sum(outputs, dim=1)
+#     labels = torch.sum(labels, dim=1)
+#     labels_mean = torch.mean(labels)
+    ss_tot = torch.sum((labels - labels_mean) ** 2, dim=0)
+    ss_res = torch.sum((labels - outputs) ** 2, dim=0)
     r2 = 1 - ss_res / ss_tot
-    return r2
+    return torch.mean(r2)
 
 # evaluate model performace (R2 score)
 def evaluate(model, test_data: Dataset, batch_size: int = 32):
