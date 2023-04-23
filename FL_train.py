@@ -39,19 +39,20 @@ def cal_r2_score(outputs, labels):
     return torch.mean(r2)
 
 # evaluate model performace (R2 score)
-def evaluate(model, test_data: Dataset, batch_size: int = 32):
+def evaluate(model, test_data: Dataset):
     model.eval()
-    losses = []
+#     r2_scores = []
+#     losses = []
     with torch.no_grad():
-        for i in tqdm(range(0, len(test_data), batch_size)):
-            batch = test_data[i:i + batch_size]
-            input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(batch["attention_mask"]).to(device)
-            outputs = model(input_ids, attention_mask)
-            batch_labels = torch.tensor(np.array([batch["V"], batch["A"], batch["D"]]).T).float().to(device)
-            loss_function = nn.MSELoss(reduction="sum")
-            loss = loss_function(outputs, batch_labels)
-            losses.append(loss)
-        return sum(losses), cal_r2_score(outputs, batch_labels)
+#         for i in tqdm(range(0, len(test_data), batch_size)):
+#         batch = test_data[i:i + batch_size]
+        input_ids, attention_mask = torch.tensor(test_data["input_ids"]).to(device), torch.tensor(test_data["attention_mask"]).to(device)
+        outputs = model(input_ids, attention_mask)
+        test_labels = torch.tensor(np.array([test_data["V"], test_data["A"], test_data["D"]]).T).float().to(device)
+        loss_function = nn.MSELoss(reduction="sum")
+        loss = loss_function(outputs, test_labels)
+        r2_score = cal_r2_score(outputs, test_labels)
+        return loss, r2_score
 
 # trainer
 def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
@@ -80,7 +81,7 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
             adam.step()
         # Test on validation data
         print("Evaluating on validation data...")
-        val_loss, r2 = evaluate(BertweetRegressor, val_data, batch_size=batch_size)
+        val_loss, r2 = evaluate(BertweetRegressor, val_data)
         print("Validation loss: {:.3f}, r2 score: {}".format(val_loss, r2))
         r_scores.append(r2)
         torch.save(BertweetRegressor.state_dict(), "{}/epoch{}.pt".format(file_path, epoch))
