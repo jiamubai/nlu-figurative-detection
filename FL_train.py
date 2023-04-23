@@ -1,4 +1,5 @@
 import numpy as np
+import os
 # from sklearn.metrics import r2_score
 import torch
 import torch.nn as nn
@@ -87,7 +88,7 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
         torch.save(BertweetRegressor.state_dict(), "{}/epoch{}.pt".format(file_path, epoch))
 #     print(r_scores)
     r_scores = torch.tensor(r_scores)
-    print("Best val achieved at epoch {}, with r2 score{}".format(torch.argmax(r_scores), torch.max(r_scores)))
+    print("Best val achieved at epoch {}, with r2 score {}, slurm_job_id: {}".format(torch.argmax(r_scores), torch.max(r_scores), os.environ['SLURM_JOB_ID']))
 
 
 # def init_trainer(model_name, train_data, val_data):
