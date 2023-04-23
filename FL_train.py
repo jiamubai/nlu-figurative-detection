@@ -59,7 +59,7 @@ def evaluate(model, test_data: Dataset):
 def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
           batch_size: int = 32, max_epochs: int = 5,
           file_path: str = "checkpoints"):
-    adam = AdamW(BertweetRegressor.parameters(), lr=5e-5, eps=1e-8)
+    adam = AdamW(BertweetRegressor.parameters(), lr=5e-4, eps=1e-6)
     loss_function = nn.MSELoss(reduction="sum")
     # store historical residuals
     r_scores = []
@@ -85,7 +85,7 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
         val_loss, r2 = evaluate(BertweetRegressor, val_data)
         print("Validation loss: {:.3f}, r2 score: {}".format(val_loss, r2))
         r_scores.append(r2)
-        torch.save(BertweetRegressor.state_dict(), "{}/epoch{}@sid{}.pt".format(file_path, epoch, os.environ['SLURM_JOB_ID']))
+        torch.save(BertweetRegressor.bertweet.state_dict(), "{}/epoch{}@sid{}.pt".format(file_path, epoch, os.environ['SLURM_JOB_ID']))
 #     print(r_scores)
     r_scores = torch.tensor(r_scores)
     print("Best val achieved at epoch {}, with r2 score {}, slurm_job_id: {}".format(torch.argmax(r_scores), torch.max(r_scores), os.environ['SLURM_JOB_ID']))
