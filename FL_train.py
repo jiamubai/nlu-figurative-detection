@@ -1,4 +1,5 @@
 import numpy as np
+import os
 # from sklearn.metrics import r2_score
 import torch
 import torch.nn as nn
@@ -29,34 +30,36 @@ class BertweetRegressor(nn.Module):
     
 # calculate residual
 def cal_r2_score(outputs, labels):
-    outputs = torch.sum(outputs, dim=1)
-    labels = torch.sum(labels, dim=1)
-    labels_mean = torch.mean(labels)
-    ss_tot = torch.sum((labels - labels_mean) ** 2)
-    ss_res = torch.sum((labels - outputs) ** 2)
+    labels_mean = torch.mean(labels, dim=0)
+#     outputs = torch.sum(outputs, dim=1)
+#     labels = torch.sum(labels, dim=1)
+#     labels_mean = torch.mean(labels)
+    ss_tot = torch.sum((labels - labels_mean) ** 2, dim=0)
+    ss_res = torch.sum((labels - outputs) ** 2, dim=0)
     r2 = 1 - ss_res / ss_tot
-    return r2
+    return torch.mean(r2)
 
 # evaluate model performace (R2 score)
-def evaluate(model, test_data: Dataset, batch_size: int = 32):
+def evaluate(model, test_data: Dataset):
     model.eval()
-    losses = []
+#     r2_scores = []
+#     losses = []
     with torch.no_grad():
-        for i in tqdm(range(0, len(test_data), batch_size)):
-            batch = test_data[i:i + batch_size]
-            input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(batch["attention_mask"]).to(device)
-            outputs = model(input_ids, attention_mask)
-            batch_labels = torch.tensor(np.array([batch["V"], batch["A"], batch["D"]]).T).float().to(device)
-            loss_function = nn.MSELoss(reduction="sum")
-            loss = loss_function(outputs, batch_labels)
-            losses.append(loss)
-        return sum(losses), cal_r2_score(outputs, batch_labels)
+#         for i in tqdm(range(0, len(test_data), batch_size)):
+#         batch = test_data[i:i + batch_size]
+        input_ids, attention_mask = torch.tensor(test_data["input_ids"]).to(device), torch.tensor(test_data["attention_mask"]).to(device)
+        outputs = model(input_ids, attention_mask)
+        test_labels = torch.tensor(np.array([test_data["V"], test_data["A"], test_data["D"]]).T).float().to(device)
+        loss_function = nn.MSELoss(reduction="sum")
+        loss = loss_function(outputs, test_labels)
+        r2_score = cal_r2_score(outputs, test_labels)
+        return loss, r2_score
 
 # trainer
 def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
           batch_size: int = 32, max_epochs: int = 5,
           file_path: str = "checkpoints"):
-    adam = AdamW(BertweetRegressor.parameters(), lr=5e-5, eps=1e-8)
+    adam = AdamW(BertweetRegressor.parameters(), lr=5e-4, eps=1e-6)
     loss_function = nn.MSELoss(reduction="sum")
     # store historical residuals
     r_scores = []
@@ -79,12 +82,13 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
             adam.step()
         # Test on validation data
         print("Evaluating on validation data...")
-        val_loss, r2 = evaluate(BertweetRegressor, val_data, batch_size=batch_size)
+        val_loss, r2 = evaluate(BertweetRegressor, val_data)
         print("Validation loss: {:.3f}, r2 score: {}".format(val_loss, r2))
-        r_scores.append(r_scores)
-        torch.save(BertweetRegressor.state_dict(), "{}/epoch{}.pt".format(file_path, epoch))
+        r_scores.append(r2)
+        torch.save(BertweetRegressor.bertweet.state_dict(), "{}/epoch{}@sid{}.pt".format(file_path, epoch, os.environ['SLURM_JOB_ID']))
+#     print(r_scores)
     r_scores = torch.tensor(r_scores)
-    print("Best val achieved at epoch {}, with r2 score{}".format(torch.argmax(r_scores), troch.max(r_scores)))
+    print("Best val achieved at epoch {}, with r2 score {}, slurm_job_id: {}".format(torch.argmax(r_scores), torch.max(r_scores), os.environ['SLURM_JOB_ID']))
 
 
 # def init_trainer(model_name, train_data, val_data):
