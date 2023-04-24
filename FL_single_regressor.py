@@ -27,6 +27,8 @@ class BertweetRegressor(nn.Module):
 
 # calculate residual
 def cal_r2_score(outputs, labels):
+    outputs = outputs.squeeze()
+    assert outputs.size() == labels.size()
     labels_mean = torch.mean(labels)
     ss_tot = torch.sum((labels - labels_mean) ** 2)
     ss_res = torch.sum((labels - outputs) ** 2)
