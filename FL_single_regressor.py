@@ -56,7 +56,7 @@ def evaluate(model, test_data: Dataset):
                                     torch.tensor(test_data["attention_mask"]).to(device)
         outputs = model(input_ids, attention_mask)
         test_labels = torch.tensor(test_data["V"]).float().to(device)
-        loss_function = nn.MSELoss(reduction="sum")
+        loss_function = nn.MSELoss()
         loss = loss_function(outputs, test_labels)
         r2_score = cal_r2_score(outputs, test_labels)
         return loss, r2_score
@@ -67,18 +67,18 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
           batch_size: int = 64, max_epochs: int = 10,
           file_path: str = "checkpoints/single_reg", clip_value: int = 2):
     # split the params of regressor
-    bert_param = [param for name, param in BertweetRegressor.named_parameters() if 'regressor' not in str(name)]
-    reg_param = [param for name, param in BertweetRegressor.named_parameters() if 'regressor' in str(name)]
+#     bert_param = [param for name, param in BertweetRegressor.named_parameters() if 'regressor' not in str(name)]
+#     reg_param = [param for name, param in BertweetRegressor.named_parameters() if 'regressor' in str(name)]
     lr, lr_mul = 5e-5, 1
     weight_decay = 5e-5
     eps = 1e-8
 
     # initialize optimizer
-    adam = AdamW([{'params': bert_param},
-                  {'params': reg_param, 'lr': lr * lr_mul, 'weight_decay': weight_decay}],
+    adam = AdamW(BertweetRegressor.parameters(),
+                # [{'params': bert_param},
+                # {'params': reg_param, 'lr': lr * lr_mul, 'weight_decay': weight_decay}],
                  lr=lr,
                  eps=eps,
-                 #                  weight_decay=weight_decay,
                  )
 
     # initialize scheduler
@@ -86,7 +86,7 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
     scheduler = get_linear_schedule_with_warmup(adam,
                                                 num_warmup_steps=0, num_training_steps=total_steps)
 
-    loss_function = nn.MSELoss(reduction="sum")
+    loss_function = nn.MSELoss()
     # store historical residuals
     r_scores = []
     for epoch in range(max_epochs):
