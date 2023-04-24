@@ -1,10 +1,11 @@
-import numpy as np
+# import numpy as np
 import os
 # from sklearn.metrics import r2_score
+from torch.nn.utils.clip_grad import clip_grad_norm
 import torch
 import torch.nn as nn
 from datasets import load_dataset, Dataset
-import transformers
+# import transformers
 from transformers import AutoTokenizer, AutoModel, AdamW, AutoModelForSequenceClassification, \
     get_linear_schedule_with_warmup, BertTokenizer, BertModel
 from tqdm import tqdm
@@ -51,8 +52,8 @@ def evaluate(model, test_data: Dataset):
     with torch.no_grad():
         #         for i in tqdm(range(0, len(test_data), batch_size)):
         #         batch = test_data[i:i + batch_size]
-        input_ids, attention_mask = torch.tensor(test_data["input_ids"]).to(device), torch.tensor(
-            test_data["attention_mask"]).to(device)
+        input_ids, attention_mask = torch.tensor(test_data["input_ids"]).to(device), \
+                                    torch.tensor(test_data["attention_mask"]).to(device)
         outputs = model(input_ids, attention_mask)
         test_labels = torch.tensor(test_data["V"]).float().to(device)
         loss_function = nn.MSELoss(reduction="sum")
@@ -64,19 +65,27 @@ def evaluate(model, test_data: Dataset):
 # trainer
 def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
           batch_size: int = 64, max_epochs: int = 10,
-          file_path: str = "checkpoints/single_reg"):
+          file_path: str = "checkpoints/single_reg", clip_value: int = 2):
     # split the params of regressor
     bert_param = [param for name, param in BertweetRegressor.named_parameters() if 'regressor' not in str(name)]
     reg_param = [param for name, param in BertweetRegressor.named_parameters() if 'regressor' in str(name)]
     lr, lr_mul = 5e-5, 1
     weight_decay = 5e-5
     eps = 1e-8
+
+    # initialize optimizer
     adam = AdamW([{'params': bert_param},
                   {'params': reg_param, 'lr': lr * lr_mul, 'weight_decay': weight_decay}],
                  lr=lr,
                  eps=eps,
                  #                  weight_decay=weight_decay,
                  )
+
+    # initialize scheduler
+    total_steps = len(train_data) * max_epochs
+    scheduler = get_linear_schedule_with_warmup(adam,
+                                                num_warmup_steps=0, num_training_steps=total_steps)
+
     loss_function = nn.MSELoss(reduction="sum")
     # store historical residuals
     r_scores = []
@@ -88,15 +97,21 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
         BertweetRegressor.train()
         for i in tqdm(range(0, len(train_data), batch_size)):
             batch = train_data[i:i + batch_size]
+            BertweetRegressor.zero_grad()
             # calculate loss and do SGD
-            input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(batch["attention_mask"]).to(device)
+            input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(
+                batch["attention_mask"]).to(device)
             logits = BertweetRegressor(input_ids, attention_mask)
             batch_labels = torch.tensor(batch["V"]).float().to(device)
             loss = loss_function(logits, batch_labels)
-            adam.zero_grad()
+
+            # adam.zero_grad()
             loss.backward()
-            #             print(loss)
+            # prevent gradient vanishing
+            clip_grad_norm(BertweetRegressor.parameters(), clip_value)
             adam.step()
+            scheduler.step()
+
         # Test on validation data
         print("Evaluating on validation data...")
         val_loss, r2 = evaluate(BertweetRegressor, val_data)
@@ -152,11 +167,11 @@ if __name__ == '__main__':
     model_name = "vinai/bertweet-base"
     # load and preprocess dataset
     reg_dataset = load_dataset("csv", data_files={"train": "norm_emobank_train.csv", "test": "norm_emobank_test.csv"})
-#     clf_dataset = load_dataset("csv", data_files={"train": "sar_and_meta_train.csv", "test": "sar_and_meta_test.csv"})
+    clf_dataset = load_dataset("csv", data_files={"train": "sar_and_meta_train.csv", "test": "sar_and_meta_test.csv"})
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
     reg_dataset["train"] = preprocess_data(reg_dataset["train"], tokenizer)
     #     reg_dataset["train"]["input_ids"] = torch.tensor(reg_dataset["train"]["input_ids"])
-#     clf_dataset["train"] = preprocess_data(clf_dataset["train"], tokenizer)
+    clf_dataset["train"] = preprocess_data(clf_dataset["train"], tokenizer)
     #     clf_dataset["train"]["input_ids"] = torch.tensor(clf_dataset["train"]["input_ids"])
     # split training set into traindev
     val_size = 0.1
@@ -166,9 +181,9 @@ if __name__ == '__main__':
     reg_dataset["train"] = reg_split["train"]
     reg_dataset["val"] = reg_split["test"]
     # classification data
-#     clf_split = clf_dataset["train"].train_test_split(val_size, seed=seed)
-#     clf_dataset["train"] = clf_split["train"]
-#     clf_dataset["val"] = clf_split["test"]
+    clf_split = clf_dataset["train"].train_test_split(val_size, seed=seed)
+    clf_dataset["train"] = clf_split["train"]
+    clf_dataset["val"] = clf_split["test"]
 
     #     print(reg_dataset["train"][:2])
     # initialize regressor model
