@@ -49,7 +49,7 @@ def evaluate(model, test_data: Dataset):
         # loss_function = nn.MSELoss()
         # loss = loss_function(outputs.squeeze(), test_labels)
         # print(outputs)
-        print(outputs[1].squeeze()[:100], test_labels[:100])
+#         print(outputs[1].squeeze()[:100], test_labels[:100])
         r2_score = cal_r2_score(outputs[1], test_labels)
         return outputs[0], r2_score
         # return 0, 0
@@ -109,8 +109,8 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
         print("Validation loss: {:.3f}, r2 score: {}".format(val_loss, r2))
         r_scores.append(r2)
 #         break
-    #         torch.save(BertweetRegressor.bertweet.state_dict(),
-    #                    "{}/epoch{}@sid{}.pt".format(file_path, epoch, os.environ['SLURM_JOB_ID']))
+        torch.save(BertweetRegressor.bertweet.state_dict(),
+                   "{}/epoch{}@sid{}.pt".format(file_path, epoch, os.environ['SLURM_JOB_ID']))
     r_scores = torch.tensor(r_scores)
     print("Best val achieved at epoch {}, with r2 score {}, slurm_job_id: {}".format(torch.argmax(r_scores),
                                                                                      torch.max(r_scores),
