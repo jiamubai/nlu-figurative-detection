@@ -43,7 +43,7 @@ def evaluate(model, test_data: Dataset):
     with torch.no_grad():
         input_ids, attention_mask = torch.tensor(test_data["input_ids"]).to(device), \
                                     torch.tensor(test_data["attention_mask"]).to(device)
-        test_labels = torch.tensor(test_data["D"]).float().to(device)
+        test_labels = torch.tensor(test_data["V"]).float().to(device)
         outputs = model(input_ids, attention_mask=attention_mask, labels=test_labels)
 
         # loss_function = nn.MSELoss()
@@ -92,7 +92,7 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
             # calculate loss and do SGD
             input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(
                 batch["attention_mask"]).to(device)
-            batch_labels = torch.tensor(batch["D"]).float().to(device)
+            batch_labels = torch.tensor(batch["V"]).float().to(device)
             logits = BertweetRegressor(input_ids, attention_mask=attention_mask, labels=batch_labels)
             loss = logits[0]
             # loss = loss_function(logits, batch_labels)
