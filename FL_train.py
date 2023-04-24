@@ -58,7 +58,7 @@ def evaluate(model, test_data: Dataset):
 # trainer
 def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
           batch_size: int = 64, max_epochs: int = 15,
-          file_path: str = "checkpoints"):
+          file_path: str = "checkpoints/multi_reg"):
     
     # split the params of regressor
     bert_param = [param for name, param in BertweetRegressor.named_parameters() if 'regressor' not in str(name)]
