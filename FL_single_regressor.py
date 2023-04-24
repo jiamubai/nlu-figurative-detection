@@ -44,9 +44,8 @@ def evaluate(model, test_data: Dataset):
         outputs = model(input_ids, attention_mask)
         test_labels = torch.tensor(test_data["V"]).float().to(device)
         loss_function = nn.MSELoss()
-        loss = loss_function(outputs, test_labels)
-        print(outputs[:100], test_labels[:100])
-        print(loss)
+        loss = loss_function(outputs.squeeze(), test_labels)
+        print(outputs.squeeze()[:100], test_labels[:100])
         r2_score = cal_r2_score(outputs, test_labels)
         return loss, r2_score
 
@@ -54,7 +53,7 @@ def evaluate(model, test_data: Dataset):
 def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
           batch_size: int = 64, max_epochs: int = 10,
           file_path: str = "checkpoints/single_reg", clip_value: int = 2):
-    lr, lr_mul = 5e-5, 1
+    lr, lr_mul = 5e-4, 1
     weight_decay = 5e-5
     eps = 1e-8
 
@@ -101,13 +100,13 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
         val_loss, r2 = evaluate(BertweetRegressor, val_data)
         print("Validation loss: {:.3f}, r2 score: {}".format(val_loss, r2))
         r_scores.append(r2)
-        break
+#         break
 #         torch.save(BertweetRegressor.bertweet.state_dict(),
 #                    "{}/epoch{}@sid{}.pt".format(file_path, epoch, os.environ['SLURM_JOB_ID']))
-#     r_scores = torch.tensor(r_scores)
-#     print("Best val achieved at epoch {}, with r2 score {}, slurm_job_id: {}".format(torch.argmax(r_scores),
-#                                                                                      torch.max(r_scores),
-#                                                                                      os.environ['SLURM_JOB_ID']))
+    r_scores = torch.tensor(r_scores)
+    print("Best val achieved at epoch {}, with r2 score {}, slurm_job_id: {}".format(torch.argmax(r_scores),
+                                                                                     torch.max(r_scores),
+                                                                                     os.environ['SLURM_JOB_ID']))
     
 
 def preprocess_data(dataset, tokenizer):
