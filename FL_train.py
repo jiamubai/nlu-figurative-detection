@@ -59,7 +59,18 @@ def evaluate(model, test_data: Dataset):
 def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
           batch_size: int = 32, max_epochs: int = 5,
           file_path: str = "checkpoints"):
-    adam = AdamW(BertweetRegressor.parameters(), lr=5e-4, eps=1e-6)
+    
+    # split the params of regressor
+    bert_param = [param for name, param in BertweetRegressor.named_parameters() if 'regressor' not in str(name)]
+    reg_param = [param for name, param in BertweetRegressor.named_parameters() if 'regressor' in str(name)]
+    lr, lr_mul =5e-4, 1000
+    weight_decay = 5e-5
+    eps = 1e-8
+    adam = AdamW([{'params': bert_param}, 
+                  {'params': reg_param, 'lr': lr*lr_mul, 'eps': eps, 'weight_decay': weight_decay}], 
+                 lr=lr, 
+                 eps=eps,
+                )
     loss_function = nn.MSELoss(reduction="sum")
     # store historical residuals
     r_scores = []
