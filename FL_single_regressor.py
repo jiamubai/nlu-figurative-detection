@@ -25,6 +25,7 @@ class BertweetRegressor(nn.Module):
         outputs = self.regressor(class_label_output)
         return outputs
 
+
 # calculate residual
 def cal_r2_score(outputs, labels):
     outputs = outputs.squeeze()
@@ -35,40 +36,47 @@ def cal_r2_score(outputs, labels):
     r2 = 1 - ss_res / ss_tot
     return r2
 
+
 # evaluate model performace (R2 score)
 def evaluate(model, test_data: Dataset):
     model.eval()
     with torch.no_grad():
         input_ids, attention_mask = torch.tensor(test_data["input_ids"]).to(device), \
                                     torch.tensor(test_data["attention_mask"]).to(device)
-        outputs = model(input_ids, attention_mask)
         test_labels = torch.tensor(test_data["V"]).float().to(device)
-        loss_function = nn.MSELoss()
-        loss = loss_function(outputs.squeeze(), test_labels)
-        print(outputs.squeeze()[:100], test_labels[:100])
-        r2_score = cal_r2_score(outputs, test_labels)
-        return loss, r2_score
+        outputs = model(input_ids, attention_mask=attention_mask, labels=test_labels)
+
+        # loss_function = nn.MSELoss()
+        # loss = loss_function(outputs.squeeze(), test_labels)
+        print(outputs)
+        # print(outputs.squeeze()[:100], test_labels[:100])
+        # r2_score = cal_r2_score(outputs, test_labels)
+        # return loss, r2_score
+        return 0, 0
+
 
 # trainer
 def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
           batch_size: int = 64, max_epochs: int = 10,
           file_path: str = "checkpoints/single_reg", clip_value: int = 2):
-    lr, lr_mul = 5e-4, 1
-    weight_decay = 5e-5
+    lr, lr_mul = 5e-5, 1
+    weight_decay = 1e-4
     eps = 1e-8
 
     # initialize optimizer
     adam = AdamW(BertweetRegressor.parameters(),
-                # [{'params': bert_param},
-                # {'params': reg_param, 'lr': lr * lr_mul, 'weight_decay': weight_decay}],
+                 # [{'params': bert_param},
+                 # {'params': reg_param, 'lr': lr * lr_mul, 'weight_decay': weight_decay}],
                  lr=lr,
                  eps=eps,
+                 weight_decay=weight_decay,
                  )
 
     # initialize scheduler
     total_steps = len(train_data) * max_epochs
     scheduler = get_linear_schedule_with_warmup(adam,
-                                                num_warmup_steps=0, num_training_steps=total_steps)
+                                                num_warmup_steps=0,
+                                                num_training_steps=total_steps)
 
     loss_function = nn.MSELoss()
     # store historical residuals
@@ -84,10 +92,10 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
             # calculate loss and do SGD
             input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(
                 batch["attention_mask"]).to(device)
-            logits = BertweetRegressor(input_ids, attention_mask)
             batch_labels = torch.tensor(batch["V"]).float().to(device)
-            loss = loss_function(logits, batch_labels)
-
+            logits = BertweetRegressor(input_ids, attention_mask=attention_mask, labels=batch_labels)
+            loss = logits[0]
+            # loss = loss_function(logits, batch_labels)
             adam.zero_grad()
             loss.backward()
             # prevent gradient vanishing
@@ -100,14 +108,14 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
         val_loss, r2 = evaluate(BertweetRegressor, val_data)
         print("Validation loss: {:.3f}, r2 score: {}".format(val_loss, r2))
         r_scores.append(r2)
-#         break
-#         torch.save(BertweetRegressor.bertweet.state_dict(),
-#                    "{}/epoch{}@sid{}.pt".format(file_path, epoch, os.environ['SLURM_JOB_ID']))
+        break
+    #         torch.save(BertweetRegressor.bertweet.state_dict(),
+    #                    "{}/epoch{}@sid{}.pt".format(file_path, epoch, os.environ['SLURM_JOB_ID']))
     r_scores = torch.tensor(r_scores)
     print("Best val achieved at epoch {}, with r2 score {}, slurm_job_id: {}".format(torch.argmax(r_scores),
                                                                                      torch.max(r_scores),
                                                                                      os.environ['SLURM_JOB_ID']))
-    
+
 
 def preprocess_data(dataset, tokenizer):
     dataset = dataset.map(lambda x: tokenizer(x['text'],
@@ -131,14 +139,15 @@ if __name__ == '__main__':
     # split training set into traindev
     val_size = 0.1
     seed = 42
-    
+
     # regression data
     reg_split = reg_dataset["train"].train_test_split(val_size, seed=seed)
     reg_dataset["train"] = reg_split["train"]
     reg_dataset["val"] = reg_split["test"]
-    
+
     # initialize regressor model
-    reg = BertweetRegressor()
+    reg = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=1)
+    # reg = BertweetRegressor()
     if torch.cuda.is_available():
         device = torch.device("cuda")
         print("Using GPU.")
