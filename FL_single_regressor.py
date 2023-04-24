@@ -48,11 +48,11 @@ def evaluate(model, test_data: Dataset):
 
         # loss_function = nn.MSELoss()
         # loss = loss_function(outputs.squeeze(), test_labels)
-        print(outputs)
-        # print(outputs.squeeze()[:100], test_labels[:100])
-        # r2_score = cal_r2_score(outputs, test_labels)
-        # return loss, r2_score
-        return 0, 0
+        # print(outputs)
+        print(outputs[1].squeeze()[:100], test_labels[:100])
+        r2_score = cal_r2_score(outputs[1], test_labels)
+        return outputs[0], r2_score
+        # return 0, 0
 
 
 # trainer
