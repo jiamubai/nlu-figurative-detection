@@ -64,13 +64,13 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
     bert_param = [param for name, param in BertweetRegressor.named_parameters() if 'regressor' not in str(name)]
     reg_param = [param for name, param in BertweetRegressor.named_parameters() if 'regressor' in str(name)]
     lr, lr_mul =5e-6, 1000
-    weight_decay = 5e-7
+    weight_decay = 5e-6
     eps = 1e-8
     adam = AdamW([{'params': bert_param}, 
-                  {'params': reg_param, 'lr': lr*lr_mul, 'eps': eps, 'weight_decay': 0}], 
+                  {'params': reg_param, 'lr': lr*lr_mul, 'eps': eps, 'weight_decay': weight_decay}], 
                  lr=lr, 
                  eps=eps,
-                 weight_decay=weight_decay,
+#                  weight_decay=weight_decay,
                 )
     loss_function = nn.MSELoss(reduction="sum")
     # store historical residuals
