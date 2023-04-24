@@ -108,7 +108,7 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
         val_loss, r2 = evaluate(BertweetRegressor, val_data)
         print("Validation loss: {:.3f}, r2 score: {}".format(val_loss, r2))
         r_scores.append(r2)
-        break
+#         break
     #         torch.save(BertweetRegressor.bertweet.state_dict(),
     #                    "{}/epoch{}@sid{}.pt".format(file_path, epoch, os.environ['SLURM_JOB_ID']))
     r_scores = torch.tensor(r_scores)
