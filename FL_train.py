@@ -63,7 +63,7 @@ def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
     # split the params of regressor
     bert_param = [param for name, param in BertweetRegressor.named_parameters() if 'regressor' not in str(name)]
     reg_param = [param for name, param in BertweetRegressor.named_parameters() if 'regressor' in str(name)]
-    lr, lr_mul =5e-6, 1000
+    lr, lr_mul =5e-6, 100
     weight_decay = 5e-5
     eps = 1e-8
     adam = AdamW([{'params': bert_param}, 
