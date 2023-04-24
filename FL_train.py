@@ -57,7 +57,7 @@ def evaluate(model, test_data: Dataset):
 
 # trainer
 def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
-          batch_size: int = 32, max_epochs: int = 20,
+          batch_size: int = 32, max_epochs: int = 10,
           file_path: str = "checkpoints"):
     
     # split the params of regressor
