@@ -112,12 +112,11 @@ def train(model, train_data: Dataset, val_data: Dataset,
         for i in tqdm(range(0, len(train_data), batch_size)):
             batch = train_data[i:i + batch_size]
             # calculate loss and do SGD
-            input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(
-                batch["attention_mask"]).to(device)
+            input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(batch["attention_mask"]).to(device)
             batch_labels = torch.tensor(batch["label"]).to(device)
             logits = model(input_ids, attention_mask)
             # loss = logits[0]
-            loss = loss_function(logits.to(device), batch_labels)
+            loss = loss_function(logits, batch_labels)
             adam.zero_grad()
             loss.backward()
             # prevent gradient vanishing
