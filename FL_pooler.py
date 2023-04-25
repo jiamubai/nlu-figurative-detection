@@ -70,11 +70,11 @@ def evaluate(model, test_data: Dataset, batch_size: int = 64):
             outputs = model(input_ids, attention_masks=attention_mask)
             # ground truth labels
             test_labels = torch.tensor(batch["label"]).to(device)
-            probs = nn.functional.softmax(outputs.to(device))
+            probs = nn.functional.softmax(outputs)
             # get model output labels
-            labels = torch.argmax(probs.to(device), dim=1)
+            labels = torch.argmax(probs, dim=1)
             # calculate cross entropy loss
-            loss = loss_function(probs.to(device), batch["label"])
+            loss = loss_function(probs, test_labels)
             losses.append(loss)
             # calculate accuracy
             correct = torch.tensor(labels == test_labels)
