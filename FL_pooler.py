@@ -131,7 +131,7 @@ def train(model, train_data: Dataset, val_data: Dataset,
         print("Validation acc: {:.3f}, cross entropy loss: {:.3f}".format(val_acc, loss))
         val_accs.append(val_acc)
         torch.save(model.state_dict(),
-                   "{}/epoch{}@sid{}.pt".format(file_path, epoch, os.environ['SLURM_JOB_ID']))
+                   "{}/epoch{}_sid{}.pt".format(file_path, epoch, os.environ['SLURM_JOB_ID']))
     r_scores = torch.tensor(val_accs)
     print("Best val acc achieved at epoch {}, with acc {}, slurm_job_id: {}".format(torch.argmax(r_scores),
                                                                                      torch.max(r_scores),
