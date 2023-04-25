@@ -87,7 +87,7 @@ def evaluate(model, test_data: Dataset, batch_size: int = 64):
 def train(model, train_data: Dataset, val_data: Dataset,
           batch_size: int = 64, max_epochs: int = 10,
           file_path: str = "checkpoints/pooler_clf", clip_value: int = 2):
-    lr, lr_mul = 5e-5, 1
+    lr, lr_mul = 5e-6, 1
     # weight_decay = 1e-5
     eps = 1e-8
     # initialize optimizer
