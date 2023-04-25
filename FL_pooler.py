@@ -48,7 +48,7 @@ class FL_pooler(nn.Module):
         concated = torch.reshape(concated, (concated.size()[0], 3, concated.size()[1] // 3))
         concated = concated.transpose(-2, -1)
         # for debugging
-        print(concated.size())
+#         print(concated.size())
         output = self.pooler(concated)
         # get logits
         logits = self.clf(output.squeeze())
@@ -130,11 +130,10 @@ def train(model, train_data: Dataset, val_data: Dataset,
         val_acc, loss = evaluate(model, val_data)
         print("Validation acc: {:.3f}, cross entropy loss: {:.3f}".format(val_acc, loss))
         val_accs.append(val_acc)
-        break
-    #         torch.save(BertweetRegressor.bertweet.state_dict(),
-    #                    "{}/epoch{}@sid{}.pt".format(file_path, epoch, os.environ['SLURM_JOB_ID']))
+        torch.save(model.state_dict(),
+                   "{}/epoch{}@sid{}.pt".format(file_path, epoch, os.environ['SLURM_JOB_ID']))
     r_scores = torch.tensor(val_accs)
-    print("Best val achieved at epoch {}, with r2 score {}, slurm_job_id: {}".format(torch.argmax(r_scores),
+    print("Best val acc achieved at epoch {}, with acc {}, slurm_job_id: {}".format(torch.argmax(r_scores),
                                                                                      torch.max(r_scores),
                                                                                      os.environ['SLURM_JOB_ID']))
 
