@@ -68,11 +68,11 @@ def evaluate(model, test_data: Dataset, batch_size: int = 64):
             outputs = model(input_ids, attention_masks=attention_mask)
             # ground truth labels
             test_labels = torch.tensor(batch["label"]).to(device)
-            probs = nn.functional.softmax(outputs)
+            probs = nn.functional.softmax(outputs.to(device))
             # get model output labels
-            labels = torch.argmax(probs, dim=1)
+            labels = torch.argmax(probs.to(device), dim=1)
             # calculate cross entropy loss
-            loss = loss_function(probs, batch["label"])
+            loss = loss_function(probs.to(device), batch["label"])
             losses.append(loss)
             # calculate accuracy
             correct = torch.tensor(labels == test_labels)
@@ -117,7 +117,7 @@ def train(model, train_data: Dataset, val_data: Dataset,
             batch_labels = torch.tensor(batch["label"]).to(device)
             logits = model(input_ids, attention_mask)
             # loss = logits[0]
-            loss = loss_function(logits, batch_labels)
+            loss = loss_function(logits.to(device), batch_labels)
             adam.zero_grad()
             loss.backward()
             # prevent gradient vanishing
