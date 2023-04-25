@@ -157,7 +157,7 @@ def train(model, train_data: Dataset, val_data: Dataset,
             torch.save(model.state_dict(),
                        "{}/best_acc_sid{}.pt".format(file_path, os.environ['SLURM_JOB_ID']))
     val_accs = torch.tensor(val_accs)
-    print("Best val acc achieved at epoch {}, with acc {}, slurm_job_id: {}".format(torch.argmax(val_accs)+1,
+    print("Best val acc achieved at epoch {}, with acc {}, slurm_job_id: {}".format(torch.argmax(val_accs)+1+EPOCH,
                                                                                      torch.max(val_accs),
                                                                                      os.environ['SLURM_JOB_ID']))
 
