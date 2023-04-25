@@ -5,7 +5,7 @@
 #SBATCH --account=ds_ga_1012-2023sp
 #SBATCH --open-mode=append
 #SBATCH --partition=n1s8-v100-1
-#SBATCH --time=01:00:00
+#SBATCH --time=03:00:00
 #SBATCH --gres=gpu:1
 #SBATCH --mem=10G
 #SBATCH -c 4
