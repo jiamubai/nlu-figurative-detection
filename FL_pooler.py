@@ -108,9 +108,9 @@ def train(model, train_data: Dataset, val_data: Dataset,
     # assign loss function
     loss_function = nn.CrossEntropyLoss()
     # load checkpoints
-    file = [f for f in os.listdir(checkpoint_path) if os.isfile(join(checkpoint_path, f))]
+    file = [f for f in os.listdir(checkpoint_path)]
     if len(file) > 0:
-        checkpoint = torch.load(join(checkpoint_path, "clf_checkpt.pt"))
+        checkpoint = torch.load(join(checkpoint_path, "/clf_checkpt.pt"))
         model.load_state_dict(checkpoint['model_state_dict'])
         adam.load_state_dict(checkpoint['optimizer_state_dict'])
         EPOCH = checkpoint['epoch']
@@ -150,7 +150,7 @@ def train(model, train_data: Dataset, val_data: Dataset,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': adam.state_dict(),
             'loss': loss,
-            }, join(checkpoint_path, "clf_checkpt.pt"))
+            }, join(checkpoint_path, "/clf_checkpt.pt"))
         
         if val_acc.item() > best_acc:
             best_acc = val_acc.item()
