@@ -85,12 +85,14 @@ def evaluate(model, test_data: Dataset, batch_size: int = 32):
 
 # trainer
 def train(model, train_data: Dataset, val_data: Dataset,
-          batch_size: int = 32, max_epochs: int = 10,
-          file_path: str = "checkpoints/pooler_clf", clip_value: int = 2):
+          batch_size: int=32, max_epochs: int=5,
+          file_path: str="checkpoints/pooler_clf", checkpoint_path: str="checkpoints/pooler_checkpts", clip_value: int=2):
+    # switch to training mode
+    model.train()
+    # initialize optimizer
     lr, lr_mul = 5e-6, 1
     # weight_decay = 1e-5
     eps = 1e-8
-    # initialize optimizer
     adam = AdamW(model.parameters(),
                  # [{'params': bert_param},
                  # {'params': reg_param, 'lr': lr * lr_mul, 'weight_decay': weight_decay}],
@@ -99,42 +101,64 @@ def train(model, train_data: Dataset, val_data: Dataset,
                  # weight_decay=weight_decay,
                  )
     # initialize scheduler
-    total_steps = len(train_data) * max_epochs
-    scheduler = get_linear_schedule_with_warmup(adam,
-                                                num_warmup_steps=0,
-                                                num_training_steps=total_steps)
+#     total_steps = len(train_data) * max_epochs
+#     scheduler = get_linear_schedule_with_warmup(adam,
+#                                                 num_warmup_steps=0,
+#                                                 num_training_steps=total_steps)
+    # assign loss function
     loss_function = nn.CrossEntropyLoss()
+    # load checkpoints
+    file = [f for f in os.listdir(checkpoint_path) if os.isfile(join(checkpoint_path, f))]
+    if len(file) > 0:
+        checkpoint = torch.load(join(checkpoint_path, "clf_checkpt.pt"))
+        model.load_state_dict(checkpoint['model_state_dict'])
+        adam.load_state_dict(checkpoint['optimizer_state_dict'])
+        EPOCH = checkpoint['epoch']
+        loss = checkpoint['loss']
+        print("checkpoint found at epoch:{}".format(EPOCH+1))
+    else:
+        EPOCH = 0
+    
     # store historical accs
     val_accs = []
+    best_acc = 0
     for epoch in range(max_epochs):
-        print("Epoch {} of {}".format(epoch + 1, max_epochs))
+        print("Epoch {} of {}".format(epoch+1+EPOCH, max_epochs+EPOCH))
         # Training code
         print("Training...")
-        model.train()
         for i in tqdm(range(0, len(train_data), batch_size)):
             batch = train_data[i:i + batch_size]
             # calculate loss and do SGD
             input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(batch["attention_mask"]).to(device)
             batch_labels = torch.tensor(batch["label"]).to(device)
             logits = model(input_ids, attention_mask)
-            # loss = logits[0]
             loss = loss_function(logits, batch_labels)
             adam.zero_grad()
             loss.backward()
             # prevent gradient vanishing
-            clip_grad_norm(model.parameters(), clip_value)
+#             clip_grad_norm(model.parameters(), clip_value)
             adam.step()
-            scheduler.step()
+#             scheduler.step()
         # Test on validation data
         print("Evaluating on validation data...")
         val_acc, loss = evaluate(model, val_data)
         print("Validation acc: {:.3f}, cross entropy loss: {:.3f}".format(val_acc, loss))
         val_accs.append(val_acc)
-        torch.save(model.state_dict(),
-                   "{}/epoch{}_sid{}.pt".format(file_path, epoch, os.environ['SLURM_JOB_ID']))
-    r_scores = torch.tensor(val_accs)
-    print("Best val acc achieved at epoch {}, with acc {}, slurm_job_id: {}".format(torch.argmax(r_scores),
-                                                                                     torch.max(r_scores),
+        # save the checkpoint of the current epoch
+        torch.save({
+            'epoch': epoch+EPOCH,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': adam.state_dict(),
+            'loss': loss,
+            }, join(checkpoint_path, "clf_checkpt.pt"))
+        
+        if val_acc.item() > best_acc:
+            best_acc = val_acc.item()
+            torch.save(model.state_dict(),
+                       "{}/best_acc_sid{}.pt".format(file_path, os.environ['SLURM_JOB_ID']))
+    val_accs = torch.tensor(val_accs)
+    print("Best val acc achieved at epoch {}, with acc {}, slurm_job_id: {}".format(torch.argmax(val_accs),
+                                                                                     torch.max(val_accs),
                                                                                      os.environ['SLURM_JOB_ID']))
 
 
