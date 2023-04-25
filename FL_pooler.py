@@ -38,11 +38,11 @@ class FL_pooler(nn.Module):
         self.a_bert.train_adapter("a_adapter")
         self.d_bert.train_adapter("d_adapter")
         # get outputs for three models
-        v_output = self.v_bert(input_ids, attention_masks)[1]
-        a_output = self.a_bert(input_ids, attention_masks)[1]
-        d_output = self.d_bert(input_ids, attention_masks)[1]
+        v_outputs = self.v_bert(input_ids, attention_masks)
+        a_outputs = self.a_bert(input_ids, attention_masks)
+        d_outputs = self.d_bert(input_ids, attention_masks)
         # concat the output and align the dimensions
-        concated = torch.cat((v_output, a_output, d_output), dim=1)
+        concated = torch.cat((v_outputs[1], a_outputs[1], d_outputs[1]), dim=1)
         concated = torch.reshape(concated, (concated.size()[0], 3, concated.size()[1] // 3))
         concated = concated.transpose(-2, -1)
         # for debugging
