@@ -16,7 +16,7 @@ class FL_pooler(nn.Module):
         D_in, D_out = 3, 1
         D_pooler_out = 768
         # get file path of fine-tuned regressor
-        p_V_path, p_A_path, p_D_path = "", "", ""
+        p_V_path, p_A_path, p_D_path = "checkpoints/best_res/epoch8@sid129682.pt", "checkpoints/best_res/epoch9@sid129776.pt", "checkpoints/best_res/epoch8@sid129709.pt"
         self.v_bert = RobertaAdapterModel.from_pretrained("vinai/bertweet-base")
         self.a_bert = RobertaAdapterModel.from_pretrained("vinai/bertweet-base")
         self.d_bert = RobertaAdapterModel.from_pretrained("vinai/bertweet-base")
