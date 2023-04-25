@@ -23,13 +23,6 @@ class FL_pooler(nn.Module):
         self.v_bert.load_state_dict(torch.load(p_V_path), strict=False)
         self.a_bert.load_state_dict(torch.load(p_A_path), strict=False)
         self.d_bert.load_state_dict(torch.load(p_D_path), strict=False)
-        self.pooler = nn.Sequential(
-            nn.Dropout(drop_rate),
-            nn.Linear(D_in, D_out))
-        self.clf = nn.Linear(D_pooler_out, 3)
-        print("initialization completed!")
-
-    def forward(self, input_ids, attention_masks):
         # add adapters and activate them
         self.v_bert.add_adapter("v_adapter")
         self.a_bert.add_adapter("a_adapter")
@@ -38,9 +31,14 @@ class FL_pooler(nn.Module):
         self.v_bert.train_adapter("v_adapter")
         self.a_bert.train_adapter("a_adapter")
         self.d_bert.train_adapter("d_adapter")
-        
-        
         print("adapters activated!")
+        self.pooler = nn.Sequential(
+            nn.Dropout(drop_rate),
+            nn.Linear(D_in, D_out))
+        self.clf = nn.Linear(D_pooler_out, 3)
+        print("initialization completed!")
+
+    def forward(self, input_ids, attention_masks):
         # get outputs for three models
         v_outputs = self.v_bert(input_ids, attention_masks)
         a_outputs = self.a_bert(input_ids, attention_masks)
