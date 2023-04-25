@@ -59,9 +59,9 @@ def evaluate(model, test_data: Dataset):
 def train(BertweetRegressor, train_data: Dataset, val_data: Dataset,
           batch_size: int = 64, max_epochs: int = 10,
           file_path: str = "checkpoints/single_reg", clip_value: int = 2):
-    lr, lr_mul = 5e-5, 1
-    weight_decay = 1e-5
-    eps = 1e-8
+    lr, lr_mul = 5e-6, 1
+    weight_decay = 1e-7
+    eps = 1e-6
 
     # initialize optimizer
     adam = AdamW(BertweetRegressor.parameters(),
