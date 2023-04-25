@@ -200,4 +200,4 @@ if __name__ == '__main__':
     model.to(device)
 
     # train the regressor
-    train(model, train_data=clf_dataset["train"][:1000], val_data=clf_dataset["val"])
+    train(model, train_data=clf_dataset["train"], val_data=clf_dataset["val"])
