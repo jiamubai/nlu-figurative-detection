@@ -49,9 +49,9 @@ class FL_pooler(nn.Module):
         concated = concated.transpose(-2, -1)
         # for debugging
         print(concated.size())
-        output = self.pooler(concated.squeeze())
+        output = self.pooler(concated)
         # get logits
-        logits = self.clf(output)
+        logits = self.clf(output.squeeze())
         return logits
 
 
