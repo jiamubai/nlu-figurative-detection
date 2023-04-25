@@ -67,12 +67,12 @@ def evaluate(model, test_data: Dataset, batch_size: int = 64):
             # get classifier logit scores
             outputs = model(input_ids, attention_masks=attention_mask)
             # ground truth labels
-            test_labels = torch.tensor(batch["labels"]).to(device)
+            test_labels = torch.tensor(batch["label"]).to(device)
             probs = nn.functional.softmax(outputs)
             # get model output labels
             labels = torch.argmax(probs, dim=1)
             # calculate cross entropy loss
-            loss = loss_function(probs, batch["labels"])
+            loss = loss_function(probs, batch["label"])
             losses.append(loss)
             # calculate accuracy
             correct = torch.tensor(labels == test_labels)
@@ -114,7 +114,7 @@ def train(model, train_data: Dataset, val_data: Dataset,
             # calculate loss and do SGD
             input_ids, attention_mask = torch.tensor(batch["input_ids"]).to(device), torch.tensor(
                 batch["attention_mask"]).to(device)
-            batch_labels = torch.tensor(batch["labels"]).to(device)
+            batch_labels = torch.tensor(batch["label"]).to(device)
             logits = model(input_ids, attention_mask)
             # loss = logits[0]
             loss = loss_function(logits, batch_labels)
