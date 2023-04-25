@@ -56,7 +56,7 @@ class FL_pooler(nn.Module):
 
 
 # evaluate model performance (acc)
-def evaluate(model, test_data: Dataset, batch_size: int = 64):
+def evaluate(model, test_data: Dataset, batch_size: int = 32):
     model.eval()
     with torch.no_grad():
         total_correct = 0
@@ -85,7 +85,7 @@ def evaluate(model, test_data: Dataset, batch_size: int = 64):
 
 # trainer
 def train(model, train_data: Dataset, val_data: Dataset,
-          batch_size: int = 64, max_epochs: int = 10,
+          batch_size: int = 32, max_epochs: int = 10,
           file_path: str = "checkpoints/pooler_clf", clip_value: int = 2):
     lr, lr_mul = 5e-6, 1
     # weight_decay = 1e-5
