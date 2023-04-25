@@ -27,6 +27,7 @@ class FL_pooler(nn.Module):
             nn.Dropout(drop_rate),
             nn.Linear(D_in, D_out))
         self.clf = nn.Linear(D_pooler_out, 3)
+        print("initialization completed!")
 
     def forward(self, input_ids, attention_masks):
         # add adapters and activate them
@@ -37,6 +38,9 @@ class FL_pooler(nn.Module):
         self.v_bert.train_adapter("v_adapter")
         self.a_bert.train_adapter("a_adapter")
         self.d_bert.train_adapter("d_adapter")
+        
+        
+        print("adapters activated!")
         # get outputs for three models
         v_outputs = self.v_bert(input_ids, attention_masks)
         a_outputs = self.a_bert(input_ids, attention_masks)
