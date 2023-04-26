@@ -123,7 +123,7 @@ def train(model, train_data: Dataset, val_data: Dataset,
     val_accs = []
     best_acc = 0
     for epoch in range(max_epochs):
-        print("Epoch {} of {}".format(epoch+1+EPOCH, max_epochs+EPOCH))
+        print("Epoch {} of {}".format(epoch+2+EPOCH, max_epochs+EPOCH+1))
         # Training code
         print("Training...")
         for i in tqdm(range(0, len(train_data), batch_size)):
@@ -146,7 +146,7 @@ def train(model, train_data: Dataset, val_data: Dataset,
         val_accs.append(val_acc)
         # save the checkpoint of the current epoch
         torch.save({
-            'epoch': epoch+EPOCH,
+            'epoch': epoch+1+EPOCH,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': adam.state_dict(),
             'loss': loss,
