@@ -110,7 +110,7 @@ def train(model, train_data: Dataset, val_data: Dataset,
     # load checkpoints
     file = [f for f in os.listdir(checkpoint_path)]
     if "clf_checkpt.pt" in file:
-        checkpoint = torch.load(os.path.join(checkpoint_path, "clf_checkpt.pt"))
+        checkpoint = torch.load(os.path.join(checkpoint_path, "clf_checkpt_vua.pt"))
         model.load_state_dict(checkpoint['model_state_dict'])
         adam.load_state_dict(checkpoint['optimizer_state_dict'])
         EPOCH = checkpoint['epoch']
@@ -150,7 +150,7 @@ def train(model, train_data: Dataset, val_data: Dataset,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': adam.state_dict(),
             'loss': loss,
-            }, os.path.join(checkpoint_path, "clf_checkpt.pt"))
+            }, os.path.join(checkpoint_path, "clf_checkpt_vua.pt"))
         
         if val_acc.item() > best_acc:
             best_acc = val_acc.item()
@@ -177,7 +177,7 @@ def preprocess_data(dataset, tokenizer):
 if __name__ == '__main__':
     model_name = "vinai/bertweet-base"
     # load and preprocess dataset
-    clf_dataset = load_dataset("csv", data_files={"train": "sar_and_meta_train.csv", "test": "sar_and_meta_test.csv"})
+    clf_dataset = load_dataset("csv", data_files={"train": "train_with_vua.csv", "test": "test_with_vua.csv"})
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
     clf_dataset["train"] = preprocess_data(clf_dataset["train"], tokenizer)
     # split training set into traindev
