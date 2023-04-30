@@ -89,8 +89,8 @@ def train_with_vad(model, optimizer, scheduler, loss_function, epochs,
 #             scheduler.step()
 
 
-        train_loss = np.array(train_loss)
-        train_loss = np.sum(train_loss)/len(train_loss)
+        train_loss = [loss.cpu().item() for loss in train_loss]
+        train_loss = np.sum(train_loss) / len(train_loss)
         train_acc = correct/ len(train_dataloader.dataset)
         
         val_loss, val_acc = evaluate_classify(model, loss_function, val_dataloader, device)
@@ -99,7 +99,7 @@ def train_with_vad(model, optimizer, scheduler, loss_function, epochs,
         print('val loss: ', val_loss, val_acc)
 
         train_loss_list.append(train_loss)
-        val_loss_list.append(val_loss)     
+        val_loss_list.append(val_loss.cpu().item())     
 
     return model, train_loss_list, val_loss_list
 
