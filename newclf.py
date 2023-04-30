@@ -21,7 +21,7 @@ class BertweetRegressor(nn.Module):
         D_in, D_out = 768, 3
         
         self.bertweet = AutoModel.from_pretrained("vinai/bertweet-base")
-        model_p = torch.load('checkpoints/multi_reg/epoch4@sid32907345.pt')
+        model_p = torch.load('checkpoints/multi_reg/epoch2@sid129547.pt')
         self.bertweet.load_state_dict(model_p)
         
         #for param in self.bertweet.parameters():
