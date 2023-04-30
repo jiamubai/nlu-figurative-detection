@@ -17,4 +17,4 @@
 singularity exec --nv \
 --bind /scratch/ys3426 --overlay /scratch/ys3426/overlay-25GB-500K.ext3:ro \
 /scratch/ys3426/cuda11.4.2-cudnn8.2.4-devel-ubuntu20.04.3.sif \
-/bin/bash -c "source /ext3/env.sh; python FL_train.py"
+/bin/bash -c "source /ext3/env.sh; python newclf_baseline.py"

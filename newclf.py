@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import transformers
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from transformers import AutoTokenizer, AutoModel, AdamW, get_linear_schedule_with_warmup, BertTokenizer, BertModel
 from transformers import Trainer, TrainingArguments
 import torch
@@ -21,7 +21,7 @@ class BertweetRegressor(nn.Module):
         D_in, D_out = 768, 3
         
         self.bertweet = AutoModel.from_pretrained("vinai/bertweet-base")
-        model_p = torch.load('checkpoints/multi_reg/epoch4@sid32907345.pt')
+        model_p = torch.load('checkpoints/multi_reg/epoch2@sid129547.pt')
         self.bertweet.load_state_dict(model_p)
         
         #for param in self.bertweet.parameters():
