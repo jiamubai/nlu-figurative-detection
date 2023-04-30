@@ -53,7 +53,7 @@ def evaluate_classify(model, loss_function, test_dataloader, device):
             pred = outputs.data.max(1, keepdim=True)[1]
             correct += pred.eq(batch_labels.data.view_as(pred)).sum()
     
-    train_loss = [loss.cpu().item() for loss in train_loss]
+    test_loss = [loss.cpu().item() for loss in test_loss]
     return np.sum(test_loss)/len(test_loss), correct/len(test_dataloader.dataset)
 
 def train_with_vad(model, optimizer, scheduler, loss_function, epochs,       
