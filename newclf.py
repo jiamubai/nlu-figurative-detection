@@ -99,7 +99,7 @@ def train_with_vad(model, optimizer, scheduler, loss_function, epochs,
         print('val loss: ', val_loss, val_acc)
 
         train_loss_list.append(train_loss)
-        val_loss_list.append(val_loss.cpu().item())     
+        val_loss_list.append(val_loss)     
 
     return model, train_loss_list, val_loss_list
 
