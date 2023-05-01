@@ -24,8 +24,8 @@ class BertweetRegressor(nn.Module):
         model_p = torch.load('checkpoints/multi_reg/epoch2@sid129547.pt')
         self.bertweet.load_state_dict(model_p)
         
-        #for param in self.bertweet.parameters():
-        #    param.requires_grad = False
+        for param in self.bertweet.parameters():
+           param.requires_grad = False
         
         self.regressor = nn.Sequential(
             nn.Dropout(drop_rate),
