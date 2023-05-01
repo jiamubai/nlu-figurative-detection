@@ -101,7 +101,7 @@ def train(model, train_data: Dataset, val_data: Dataset,
     num_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print("Trainable params: {}".format(num_trainable_params))
     # initialize optimizer
-    lr, lr_mul = 5e-6, 1
+    lr, lr_mul = 8e-5, 1
     # weight_decay = 1e-5
     eps = 1e-8
     adam = AdamW(model.parameters(),
