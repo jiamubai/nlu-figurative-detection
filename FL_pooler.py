@@ -31,15 +31,15 @@ class FL_pooler(nn.Module):
         for param in self.d_bert.parameters():
            param.requires_grad = False
         
-        # add adapters and activate them
-        self.v_bert.add_adapter("v_adapter")
-        self.a_bert.add_adapter("a_adapter")
-        self.d_bert.add_adapter("d_adapter")
-        # Activate the adapter
-        self.v_bert.train_adapter("v_adapter")
-        self.a_bert.train_adapter("a_adapter")
-        self.d_bert.train_adapter("d_adapter")
-        print("adapters activated!")
+#         # add adapters and activate them
+#         self.v_bert.add_adapter("v_adapter")
+#         self.a_bert.add_adapter("a_adapter")
+#         self.d_bert.add_adapter("d_adapter")
+#         # Activate the adapter
+#         self.v_bert.train_adapter("v_adapter")
+#         self.a_bert.train_adapter("a_adapter")
+#         self.d_bert.train_adapter("d_adapter")
+#         print("adapters activated!")
         self.pooler = nn.Sequential(
             nn.Dropout(drop_rate),
             nn.Linear(D_in, D_out))
