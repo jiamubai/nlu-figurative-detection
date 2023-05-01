@@ -113,7 +113,7 @@ def create_dataloaders(inputs, masks, labels, batch_size):
     return dataloader
   
 # load dataset
-train_fl = pd.read_csv("train_with_vua.csv")[:10000]
+train_fl = pd.read_csv("train_with_vua.csv")
 test_fl = pd.read_csv("test_with_vua.csv")
 
 val_size = 0.1
