@@ -4,7 +4,7 @@
 ### python and notebook execs:
 - FL_pooler: pooler model with 3 bertweet output and a linear layer
 - FL_pooler_with_f1: added f1 eval metric to FL_pooler
-- FL_train: original model to 
+- FL_train: original model for multi head VAD regression task
 - FLtest: notebook 
 ### slurm job files:
 - clf_train: train the FL_pooler
