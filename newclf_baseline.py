@@ -80,8 +80,8 @@ def train_with_vad(model, optimizer, scheduler, loss_function, epochs,
                 output = model(batch_inputs, batch_masks)
                 loss = loss_function(output, 
                                  batch_labels)
-                if (step%10==0):
-                    print(step)
+#                 if (step%10==0):
+#                     print(step)
                 train_loss.append(loss.data)
 
                 #pred = output.data.max(1, keepdim=True)[1]
