@@ -120,15 +120,15 @@ def train(model, train_data: Dataset, val_data: Dataset,
     loss_function = nn.CrossEntropyLoss()
     # load checkpoints
     file = [f for f in os.listdir(checkpoint_path)]
-    if "clf_checkpt.pt" in file:
-        checkpoint = torch.load(os.path.join(checkpoint_path, "clf_checkpt_vua.pt"))
-        model.load_state_dict(checkpoint['model_state_dict'])
-        adam.load_state_dict(checkpoint['optimizer_state_dict'])
-        EPOCH = checkpoint['epoch']
-        loss = checkpoint['loss']
-        print("checkpoint found at epoch:{}".format(EPOCH+1))
-    else:
-        EPOCH = 0
+    EPOCH = 0
+#     if "clf_checkpt.pt" in file:
+#         checkpoint = torch.load(os.path.join(checkpoint_path, "clf_checkpt_vua.pt"))
+#         model.load_state_dict(checkpoint['model_state_dict'])
+#         adam.load_state_dict(checkpoint['optimizer_state_dict'])
+#         EPOCH = checkpoint['epoch']
+#         loss = checkpoint['loss']
+#         print("checkpoint found at epoch:{}".format(EPOCH+1))
+        
     
     # store historical accs
     val_accs = []
