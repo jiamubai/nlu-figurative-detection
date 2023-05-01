@@ -156,12 +156,12 @@ def train(model, train_data: Dataset, val_data: Dataset,
         print("Validation acc: {:.3f}, cross entropy loss: {:.3f}".format(val_acc, loss))
         val_accs.append(val_acc)
         # save the checkpoint of the current epoch
-        torch.save({
-            'epoch': epoch+1+EPOCH,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': adam.state_dict(),
-            'loss': loss,
-            }, os.path.join(checkpoint_path, "clf_checkpt_vua.pt"))
+#         torch.save({
+#             'epoch': epoch+1+EPOCH,
+#             'model_state_dict': model.state_dict(),
+#             'optimizer_state_dict': adam.state_dict(),
+#             'loss': loss,
+#             }, os.path.join(checkpoint_path, "clf_checkpt_vua.pt"))
         
         if val_acc.item() > best_acc:
             best_acc = val_acc.item()
