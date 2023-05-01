@@ -70,7 +70,7 @@ def train_with_vad(model, optimizer, scheduler, loss_function, epochs,
         model.train()
         #2307
         num_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        print(num_trainable_params)
+        #print(num_trainable_params)
         train_loss = []
         correct = 0
         for step, batch in enumerate(train_dataloader): 
@@ -80,8 +80,6 @@ def train_with_vad(model, optimizer, scheduler, loss_function, epochs,
                 output = model(batch_inputs, batch_masks)
                 loss = loss_function(output, 
                                  batch_labels)
-#                 if (step%10==0):
-#                     print(step)
                 train_loss.append(loss.data)
 
                 #pred = output.data.max(1, keepdim=True)[1]
