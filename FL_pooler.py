@@ -23,6 +23,14 @@ class FL_pooler(nn.Module):
         self.v_bert.load_state_dict(torch.load(p_V_path), strict=False)
         self.a_bert.load_state_dict(torch.load(p_A_path), strict=False)
         self.d_bert.load_state_dict(torch.load(p_D_path), strict=False)
+        # freeze the parameters
+        for param in self.v_bert.parameters():
+           param.requires_grad = False
+        for param in self.a_bert.parameters():
+           param.requires_grad = False
+        for param in self.d_bert.parameters():
+           param.requires_grad = False
+        
         # add adapters and activate them
         self.v_bert.add_adapter("v_adapter")
         self.a_bert.add_adapter("a_adapter")
@@ -89,6 +97,9 @@ def train(model, train_data: Dataset, val_data: Dataset,
           file_path: str="checkpoints/pooler_clf", checkpoint_path: str="checkpoints/pooler_checkpts", clip_value: int=2):
     # switch to training mode
     model.train()
+    # check trainable params
+    num_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print("Trainable params: {}".format(num_trainable_params))
     # initialize optimizer
     lr, lr_mul = 5e-6, 1
     # weight_decay = 1e-5
