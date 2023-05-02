@@ -89,7 +89,7 @@ def evaluate(model, test_data: Dataset, batch_size: int = 32):
             correct = torch.tensor(labels == test_labels)
             total_correct += sum(correct)
             # compute f1 score
-            f1 = f1_score(test_labels, labels, average='weighted')
+            f1 = f1_score(test_labels.cpu(), labels.cpu(), average='weighted')
             scores.append(f1)
         acc = total_correct / len(test_data)
         return acc, torch.mean(torch.tensor(losses)), torch.mean(torch.tensor(scores))
