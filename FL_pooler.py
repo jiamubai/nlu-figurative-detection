@@ -69,6 +69,7 @@ def evaluate(model, test_data: Dataset, batch_size: int = 32):
     with torch.no_grad():
         total_correct = 0
         losses = []
+        scores = []
         loss_function = nn.CrossEntropyLoss()
         for i in tqdm(range(0, len(test_data), batch_size)):
             batch = test_data[i:i + batch_size]
@@ -87,8 +88,11 @@ def evaluate(model, test_data: Dataset, batch_size: int = 32):
             # calculate accuracy
             correct = torch.tensor(labels == test_labels)
             total_correct += sum(correct)
-            acc = total_correct / len(test_data)
-        return acc, torch.mean(torch.tensor(losses))
+            # compute f1 score
+            f1 = f1_score(test_labels, labels, 'weighted')
+            scores.append(f1)
+        acc = total_correct / len(test_data)
+        return acc, torch.mean(torch.tensor(losses)), torch.mean(torch.tensor(scores))
 
 
 # trainer
@@ -133,6 +137,7 @@ def train(model, train_data: Dataset, val_data: Dataset,
     
     # store historical accs
     val_accs = []
+    avg_f1s = []
     best_acc = 0
     for epoch in range(max_epochs):
         print("Epoch {} of {}".format(epoch+1+EPOCH, max_epochs+EPOCH))
@@ -153,9 +158,10 @@ def train(model, train_data: Dataset, val_data: Dataset,
 #             scheduler.step()
         # Test on validation data
         print("Evaluating on validation data...")
-        val_acc, loss = evaluate(model, val_data)
-        print("Validation acc: {:.3f}, cross entropy loss: {:.3f}".format(val_acc, loss))
+        val_acc, loss, avg_f1 = evaluate(model, val_data)
+        print("Validation acc: {:.3f}, cross entropy loss: {:.3f}, F1 score: {:.3f}".format(val_acc, loss, avg_f1))
         val_accs.append(val_acc)
+        avg_f1s.append(avg_f1)
         # save the checkpoint of the current epoch
 #         torch.save({
 #             'epoch': epoch+1+EPOCH,
@@ -169,8 +175,8 @@ def train(model, train_data: Dataset, val_data: Dataset,
             torch.save(model.state_dict(),
                        "{}/best_acc_sid{}.pt".format(file_path, os.environ['SLURM_JOB_ID']))
     val_accs = torch.tensor(val_accs)
-    print("Best val acc achieved at epoch {}, with acc {}, slurm_job_id: {}".format(torch.argmax(val_accs)+1+EPOCH,
-                                                                                     torch.max(val_accs),
+    print("Best val acc achieved at epoch {}, with acc {}, f1 score {}, slurm_job_id: {}".format(torch.argmax(val_accs)+1+EPOCH,
+                                                                                     torch.max(val_accs), torch.max(avg_f1s), 
                                                                                      os.environ['SLURM_JOB_ID']))
 
 
