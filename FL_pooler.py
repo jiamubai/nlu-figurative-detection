@@ -93,7 +93,7 @@ def evaluate(model, test_data: Dataset, batch_size: int = 32):
 
 # trainer
 def train(model, train_data: Dataset, val_data: Dataset,
-          batch_size: int=32, max_epochs: int=5,
+          batch_size: int=32, max_epochs: int=10,
           file_path: str="checkpoints/pooler_clf", checkpoint_path: str="checkpoints/pooler_checkpts", clip_value: int=2):
     # switch to training mode
     model.train()
@@ -121,20 +121,21 @@ def train(model, train_data: Dataset, val_data: Dataset,
     # load checkpoints
     file = [f for f in os.listdir(checkpoint_path)]
     EPOCH = 0
-#     if "clf_checkpt.pt" in file:
+    if "clf_checkpt.pt" in file:
 #         checkpoint = torch.load(os.path.join(checkpoint_path, "clf_checkpt_vua.pt"))
 #         model.load_state_dict(checkpoint['model_state_dict'])
 #         adam.load_state_dict(checkpoint['optimizer_state_dict'])
 #         EPOCH = checkpoint['epoch']
 #         loss = checkpoint['loss']
 #         print("checkpoint found at epoch:{}".format(EPOCH+1))
+        EPOCH += 1
         
     
     # store historical accs
     val_accs = []
     best_acc = 0
     for epoch in range(max_epochs):
-        print("Epoch {} of {}".format(epoch+2+EPOCH, max_epochs+EPOCH+1))
+        print("Epoch {} of {}".format(epoch+1+EPOCH, max_epochs+EPOCH))
         # Training code
         print("Training...")
         for i in tqdm(range(0, len(train_data), batch_size)):
