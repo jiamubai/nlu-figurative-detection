@@ -202,6 +202,7 @@ if __name__ == '__main__':
 
     # initialize regressor model
     model = FL_pooler()
+    model.load_state_dict(torch.load("checkpoints/pooler_clf/best_acc_sid133500.pt"))
     # assign computing resources
     if torch.cuda.is_available():
         device = torch.device("cuda")
