@@ -7,7 +7,7 @@ from transformers import AutoTokenizer, AutoModel, AdamW, AutoModelForSequenceCl
     get_linear_schedule_with_warmup, BertTokenizer, BertModel
 from tqdm import tqdm
 from transformers.adapters import RobertaAdapterModel
-
+from sklearn.metrics import f1_score
 
 # implementation of FL_pooler class
 class FL_pooler(nn.Module):
