@@ -105,7 +105,7 @@ def train(model, train_data: Dataset, val_data: Dataset,
     num_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print("Trainable params: {}".format(num_trainable_params))
     # initialize optimizer
-    lr, lr_mul = 8e-5, 1
+    lr, lr_mul = 5e-4, 1
     # weight_decay = 1e-5
     eps = 1e-8
     adam = AdamW(model.parameters(),
@@ -209,7 +209,7 @@ if __name__ == '__main__':
 
     # initialize regressor model
     model = FL_pooler()
-    model.load_state_dict(torch.load("checkpoints/pooler_clf/best_acc_sid133816.pt"))
+    model.load_state_dict(torch.load("checkpoints/pooler_clf/best_acc_sid133864.pt"))
     # assign computing resources
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -220,12 +220,12 @@ if __name__ == '__main__':
     model.to(device)
 
     # train the regressor
-#     train(model, train_data=clf_dataset["train"], val_data=clf_dataset["val"])
+    train(model, train_data=clf_dataset["train"], val_data=clf_dataset["val"])
     
     # eval on test set
-    test_dataset = load_dataset("csv", data_files="test_with_vua.csv")
-    acc, loss, f1 = evaluate(model, test_data)
-    print("Validation acc: {:.3f}, cross entropy loss: {:.3f}, F1 score: {:.3f}".format(acc, loss, f1))
+#     test_dataset = load_dataset("csv", data_files="test_with_vua.csv")
+#     acc, loss, f1 = evaluate(model, test_data)
+#     print("Validation acc: {:.3f}, cross entropy loss: {:.3f}, F1 score: {:.3f}".format(acc, loss, f1))
     
     
     
