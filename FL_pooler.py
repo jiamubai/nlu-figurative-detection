@@ -220,12 +220,12 @@ if __name__ == '__main__':
     model.to(device)
 
     # train the regressor
-    train(model, train_data=clf_dataset["train"], val_data=clf_dataset["val"])
+#     train(model, train_data=clf_dataset["train"], val_data=clf_dataset["val"])
     
     # eval on test set
-#     test_dataset = load_dataset("csv", data_files="test_with_vua.csv")
-#     acc, loss, f1 = evaluate(model, test_data)
-#     print("Validation acc: {:.3f}, cross entropy loss: {:.3f}, F1 score: {:.3f}".format(acc, loss, f1))
+    test_dataset = load_dataset("csv", data_files="test_with_vua.csv")
+    acc, loss, f1 = evaluate(model, test_data)
+    print("Test acc: {:.3f}, cross entropy loss: {:.3f}, F1 score: {:.3f}".format(acc, loss, f1))
     
     
     
