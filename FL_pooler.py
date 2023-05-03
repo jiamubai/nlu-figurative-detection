@@ -224,7 +224,7 @@ if __name__ == '__main__':
     
     # eval on test set
     test_dataset = load_dataset("csv", data_files="test_with_vua.csv")
-    acc, loss, f1 = evaluate(model, test_data)
+    acc, loss, f1 = evaluate(model, test_dataset)
     print("Test acc: {:.3f}, cross entropy loss: {:.3f}, F1 score: {:.3f}".format(acc, loss, f1))
     
     
