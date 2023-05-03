@@ -220,12 +220,12 @@ if __name__ == '__main__':
     model.to(device)
 
     # train the regressor
-#     train(model, train_data=clf_dataset["train"], val_data=clf_dataset["val"])
+    train(model, train_data=clf_dataset["train"], val_data=clf_dataset["val"])
     
     # eval on test set
-    clf_dataset["test"] = preprocess_data(clf_dataset["test"], tokenizer)
-    acc, loss, f1 = evaluate(model, clf_dataset["test"])
-    print("Test acc: {:.3f}, cross entropy loss: {:.3f}, F1 score: {:.3f}".format(acc, loss, f1))
+#     clf_dataset["test"] = preprocess_data(clf_dataset["test"], tokenizer)
+#     acc, loss, f1 = evaluate(model, clf_dataset["test"])
+#     print("Test acc: {:.3f}, cross entropy loss: {:.3f}, F1 score: {:.3f}".format(acc, loss, f1))
     
     
     
