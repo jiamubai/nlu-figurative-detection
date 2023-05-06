@@ -54,14 +54,14 @@ def cal_r2_score(outputs, labels):
 # evaluate model performace (R2 score)
 def evaluate(model, test_dataloader):
     for batch in test_dataloader:
-        reg_input_ids, reg_attention_mask, reg_labels = torch.tensor(reg_data["input_ids"]).to(device), torch.tensor(reg_data["attention_mask"]).to(device)
-        reg_labels = torch.tensor(np.array([reg_data["V"], reg_data["A"], reg_data["D"]]).T).float().to(device)
+        reg_input_ids, reg_attention_mask, reg_labels = torch.tensor(batch["input_ids"]).to(device), torch.tensor(batch["attention_mask"]).to(device)
+        reg_labels = torch.tensor(np.array([batch["V"], batch["A"], batch["D"]]).T).float().to(device)
         
         reg_output = model(reg_input_ids, reg_attention_mask, 'reg')
         
         loss_function = nn.MSELoss(reduction="sum")
-        loss = loss_function(outputs, test_labels)
-        r2_score = cal_r2_score(outputs, reg_labels)
+        loss = loss_function(reg_output, reg_labels)
+        r2_score = cal_r2_score(reg_output, reg_labels)
         return loss, r2_score
     
 def evaluate_classify(model, loss_function, test_dataloader, device):
@@ -144,13 +144,13 @@ def train(BertweetMulti, reg_train_dataloader, reg_val_dataloader, clf_train_dat
         print("Evaluating on validation data...")
         reg_val_loss, reg_r2 = evaluate(BertweetMulti, reg_val_dataloader)
         
-        clf_val_loss, clf_val_acc = evaluate_classify(model, loss_function, clf_val_dataloader, device)
+        clf_val_loss, clf_val_acc = evaluate_classify(BertweetMulti, loss_function_clf , clf_val_dataloader, device)
         
         train_loss = [loss.cpu().item() for loss in train_loss]
         train_loss = np.sum(train_loss) / len(train_loss)
-        train_acc = correct/ len(train_dataloader.dataset)
+        #train_acc = correct/ len(train_dataloader.dataset)
         
-        print('train loss: ', train_loss, train_acc)
+        print('train loss: ', train_loss)
         print('reg_val loss: ', reg_val_loss, reg_r2)
         print('clf_val loss: ', clf_val_loss, clf_val_acc)
         
