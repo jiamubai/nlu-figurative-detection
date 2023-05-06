@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 import os
 # from sklearn.metrics import r2_score
 import torch
@@ -10,6 +12,7 @@ from tqdm import tqdm
 from torch.utils.data import TensorDataset, DataLoader
 import random
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import f1_score
 
 # Bertweet regressor
 class BertweetMulti(nn.Module):
@@ -66,6 +69,10 @@ def evaluate_reg(model, test_dataloader):
 def evaluate_classify(model, loss_function, test_dataloader, device):
     test_loss = []
     correct = 0
+    
+    all_labels = []
+    all_preds = []
+    
     for batch in test_dataloader:
         batch_inputs, batch_masks, batch_labels = \
                                  tuple(b.to(device) for b in batch)
@@ -76,9 +83,14 @@ def evaluate_classify(model, loss_function, test_dataloader, device):
             test_loss.append(loss)
             pred = outputs.data.max(1, keepdim=True)[1]
             correct += pred.eq(batch_labels.data.view_as(pred)).sum()
-    
+            
+            preds = torch.argmax(outputs, dim=1)
+            all_preds.extend(preds.tolist())
+            all_labels.extend(batch_labels.tolist())
+            
+    f1 = f1_score(all_labels, all_preds, average='weighted')
     test_loss = [loss.cpu().item() for loss in test_loss]
-    return np.sum(test_loss)/len(test_loss), correct/len(test_dataloader.dataset)
+    return np.sum(test_loss)/len(test_loss), correct/len(test_dataloader.dataset), f1
 
 def get_dataloader(clf_loader, reg_loader):
     if random.random() > 0.5:
@@ -146,7 +158,7 @@ def train(BertweetMulti, reg_train_dataloader, reg_val_dataloader, clf_train_dat
         print("Evaluating on validation data...")
         reg_val_loss, reg_r2 = evaluate_reg(BertweetMulti, reg_val_dataloader)
         
-        clf_val_loss, clf_val_acc = evaluate_classify(BertweetMulti, loss_function_clf , clf_val_dataloader, device)
+        clf_val_loss, clf_val_acc, clf_f1 = evaluate_classify(BertweetMulti, loss_function_clf , clf_val_dataloader, device)
         
         train_loss = [loss.cpu().item() for loss in train_loss]
         train_loss = np.sum(train_loss) / len(train_loss)
@@ -154,7 +166,7 @@ def train(BertweetMulti, reg_train_dataloader, reg_val_dataloader, clf_train_dat
         
         print('train loss: ', train_loss)
         print('reg_val loss: ', reg_val_loss, 'reg_val r2: ', reg_r2)
-        print('clf_val loss: ', clf_val_loss, "clf_val acc: ", clf_val_acc)
+        print('clf_val loss: ', clf_val_loss, "clf_val acc: ", clf_val_acc,  "clf_val f1: ", clf_val_f1)
     
     
 def preprocess_data(dataset, tokenizer):
