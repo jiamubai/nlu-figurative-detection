@@ -252,6 +252,7 @@ if __name__ == '__main__':
     model_name = "vinai/bertweet-base"
     # load and preprocess dataset
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
+    batch_size = 32
     
     clf_train = pd.read_csv("sar_and_meta_train.csv")[:10000]
     clf_test = pd.read_csv("sar_and_meta_test.csv")
