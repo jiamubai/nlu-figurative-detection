@@ -106,8 +106,8 @@ def train(BertweetMulti, reg_train_dataloader, reg_val_dataloader, clf_train_dat
           file_path: str = "checkpoints/multi_reg"):
     
     # split the params of regressor
-    lr =1e-4
-    weight_decay = 5e-5
+    lr =1e-5
+    weight_decay = 5e-6
     eps = 1e-8
     adam = AdamW(BertweetMulti.parameters(), lr=lr, eps=eps)
     loss_function_reg = nn.MSELoss(reduction="sum")
