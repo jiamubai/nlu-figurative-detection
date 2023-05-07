@@ -166,7 +166,7 @@ def train(BertweetMulti, reg_train_dataloader, reg_val_dataloader, clf_train_dat
         
         print('train loss: ', train_loss)
         print('reg_val loss: ', reg_val_loss, 'reg_val r2: ', reg_r2)
-        print('clf_val loss: ', clf_val_loss, "clf_val acc: ", clf_val_acc,  "clf_val f1: ", clf_val_f1)
+        print('clf_val loss: ', clf_val_loss, "clf_val acc: ", clf_val_acc,  "clf_val f1: ", clf_f1)
     
     
 def preprocess_data(dataset, tokenizer):
